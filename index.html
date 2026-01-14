@@ -86,14 +86,14 @@
             <button id="install-btn">Install App</button>
         </div>
 
-        <div id="login-screen" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; padding:20px;">
+        <div id="login-screen" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; padding:20px; width:100%; box-sizing:border-box;">
             <div class="logo-hexagon">D</div>
             <h1 style="color:var(--neon); font-size: 1.5rem; text-align:center; margin:0;">DASH-R</h1>
             <p style="font-size: 0.7rem; color: #888; text-align: center; margin:0;">
                 Hartford Sector 860. <br>Goal: $375. Time: 10:00.
             </p>
-            <input type="text" id="worker-id-input" placeholder="OPERATOR NAME" style="width:100%; max-width:300px;">
-            <button class="btn-submit" id="start-btn" style="width:100%; max-width:300px;">GO ONLINE</button>
+            <input type="text" id="worker-id-input" placeholder="OPERATOR NAME" style="width:100%; box-sizing:border-box;">
+            <button class="btn-submit" id="start-btn" style="width:100%;">GO ONLINE</button>
         </div>
 
         <div id="app-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
@@ -208,15 +208,17 @@
                     b.onclick = () => validate(o); 
                     g.appendChild(b);
                 });
-                
-                const skp = document.createElement('button'); 
-                skp.className = "btn-skip"; skp.innerText = "SKIP LOGIC (-$10)";
-                skp.style.marginTop = "10px"; skp.style.width = "100%";
-                skp.onclick = () => skipTask();
-                
                 ra.appendChild(g);
-                ra.appendChild(skp);
             }
+            
+            // Add consistent skip button for both types
+            const skp = document.createElement('button'); 
+            skp.className = "btn-skip"; 
+            skp.innerText = "SKIP (-$10)";
+            skp.style.marginTop = "10px"; 
+            skp.style.width = "100%";
+            skp.onclick = () => skipTask();
+            document.getElementById('render-area').appendChild(skp);
         }
 
         function validate(v) {
