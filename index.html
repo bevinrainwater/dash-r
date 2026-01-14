@@ -20,7 +20,7 @@
             background: #000; display: flex; justify-content: center; 
             font-family: 'Courier New', monospace; overflow: hidden; 
         }
- 
+
         #app-viewport {
             width: 100%; max-width: 420px; height: 100dvh;
             background: var(--bg); color: white; display: flex; flex-direction: column;
@@ -55,7 +55,7 @@
             margin-bottom: 10px; overflow-y: auto; color: #fff;
         }
         
-        #render-area { flex-grow: 1; width: 100%; display: flex; flex-direction: column; justify-content: center; }
+        #render-area { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; }
 
         input[type="text"] { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: var(--neon); font-size: 1rem; border-radius: 6px; text-align: center; margin-bottom: 10px; outline: none; box-sizing: border-box; }
         
@@ -86,14 +86,14 @@
             <button id="install-btn">Install App</button>
         </div>
 
-        <div id="login-screen" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+        <div id="login-screen" style="display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; padding:20px;">
             <div class="logo-hexagon">D</div>
             <h1 style="color:var(--neon); font-size: 1.5rem; text-align:center; margin:0;">DASH-R</h1>
-            <p style="font-size: 0.7rem; color: #888; text-align: center; padding: 15px;">
+            <p style="font-size: 0.7rem; color: #888; text-align: center; margin:0;">
                 Hartford Sector 860. <br>Goal: $375. Time: 10:00.
             </p>
-            <input type="text" id="worker-id-input" placeholder="OPERATOR NAME">
-            <button class="btn-submit" id="start-btn" style="width:100%;">GO ONLINE</button>
+            <input type="text" id="worker-id-input" placeholder="OPERATOR NAME" style="width:100%; max-width:300px;">
+            <button class="btn-submit" id="start-btn" style="width:100%; max-width:300px;">GO ONLINE</button>
         </div>
 
         <div id="app-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
