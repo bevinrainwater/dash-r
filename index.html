@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="DASH-R: A logic puzzle game for students">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DASH-R">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23050505' width='180' height='180'/><text x='90' y='120' font-size='80' font-weight='900' fill='%2300ffcc' text-anchor='middle'>D</text></svg>">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23050505' width='192' height='192'/><text x='96' y='140' font-size='100' font-weight='900' fill='%2300ffcc' text-anchor='middle'>D</text></svg>">
+    <title>DASH-R Hartford v44.0</title>
+    <style>
+        :root { --neon: #00ffcc; --bg: #050505; --alert: #ff3333; --skip: #ffaa00; --card: #121212; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100dvh; 
+            background: #000; display: flex; justify-content: center; 
+            font-family: 'Courier New', monospace; overflow: hidden; 
+        }
+
+        #app-viewport {
+            width: 100%; max-width: 420px; height: 100dvh;
+            background: var(--bg); color: white; display: flex; flex-direction: column;
+            padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
+            box-sizing: border-box;
+        }
+
+        .logo-hexagon { 
+            width: 24px; height: 14px; background: var(--neon); position: relative; 
+            margin: 5px auto 10px; display: flex; align-items: center; justify-content: center; 
+            color: #000; font-weight: 900; font-size: 10px; flex-shrink: 0;
+        }
+        .logo-hexagon:before, .logo-hexagon:after { content: ""; position: absolute; left: 0; width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; }
+        .logo-hexagon:before { bottom: 100%; border-bottom: 7px solid var(--neon); }
+        .logo-hexagon:after { top: 100%; width: 0; border-top: 7px solid var(--neon); }
+
+        header { background: var(--card); border: 1px solid #333; border-radius: 8px; padding: 6px; margin-bottom: 5px; flex-shrink: 0; }
+        .stats-row { display: flex; justify-content: space-between; font-size: 0.6rem; color: #888; }
+        #earnings-display { font-size: 1.5rem; color: var(--neon); font-weight: bold; text-align: center; }
+        #timer { font-size: 1rem; text-align: center; color: #fff; margin-bottom: 2px; }
+        
+        #task-box { 
+            background: var(--card); border-radius: 12px; padding: 12px; 
+            flex-grow: 1; display: flex; flex-direction: column; 
+            border: 1px solid #222; overflow: hidden; margin-bottom: 10px;
+        }
+        
+        #task-prompt { 
+            font-size: 0.85rem; line-height: 1.3; text-align: center; 
+            min-height: 50px; flex-shrink: 1; 
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px; overflow-y: auto; color: #fff;
+        }
+        
+        #render-area { flex-grow: 1; width: 100%; display: flex; flex-direction: column; justify-content: center; }
+
+        input[type="text"] { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: var(--neon); font-size: 1rem; border-radius: 6px; text-align: center; margin-bottom: 10px; outline: none; box-sizing: border-box; }
+        
+        .button-row { display: flex; gap: 8px; width: 100%; margin-top: auto; }
+        
+        .btn-submit { flex: 2; background: var(--neon); color: #000; padding: 15px; border: none; font-weight: 900; border-radius: 6px; cursor: pointer; font-size: 0.9rem; text-transform: uppercase; }
+        .btn-skip { flex: 1; background: transparent; color: var(--skip); border: 1px solid var(--skip); padding: 15px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+
+        .grid-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        .opt-btn { background: #1a1a1a; color: #eee; border: 1px solid #333; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; }
+
+        .hidden { display: none !important; }
+
+        #install-prompt {
+            background: var(--card); border: 1px solid var(--neon); border-radius: 8px; 
+            padding: 10px; margin-bottom: 10px; text-align: center; font-size: 0.7rem;
+            display: none;
+        }
+        #install-btn { width: 100%; padding: 8px; background: var(--neon); color: #000; border: none; 
+            border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+
+    <div id="app-viewport">
+        <div id="install-prompt">
+            <div style="margin-bottom: 8px;">📱 Install DASH-R for offline play</div>
+            <button id="install-btn">Install App</button>
+        </div>
+
+        <div id="login-screen" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+            <div class="logo-hexagon">D</div>
+            <h1 style="color:var(--neon); font-size: 1.5rem; text-align:center; margin:0;">DASH-R</h1>
+            <p style="font-size: 0.7rem; color: #888; text-align: center; padding: 15px;">
+                Hartford Sector 860. <br>Goal: $375. Time: 10:00.
+            </p>
+            <input type="text" id="worker-id-input" placeholder="OPERATOR NAME">
+            <button class="btn-submit" id="start-btn" style="width:100%;">GO ONLINE</button>
+        </div>
+
+        <div id="app-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+            <header>
+                <div class="stats-row"><span>OP: <b id="user-id-display"></b></span><span>UNITS: <b id="task-counter">0</b></span></div>
+                <div id="earnings-display">$0.00</div>
+            </header>
+            <div id="timer">10:00</div>
+            
+            <div id="task-box">
+                <div id="task-prompt">Initializing...</div>
+                <div id="render-area"></div>
+                
+                <div id="final-report" class="hidden">
+                    <div style="text-align: center;">
+                        <h2 style="color:var(--neon); font-size: 0.9rem; margin-bottom:5px;">SHIFT AUDIT</h2>
+                        <div id="report-text" style="text-align: left; background: #000; padding: 10px; border: 1px solid var(--neon); border-radius: 6px; font-size: 0.8rem; line-height: 1.4; margin-bottom: 10px;"></div>
+                        <button class="btn-submit" onclick="location.reload()" style="font-size: 0.8rem;">RESET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let earnings = 0, timeLeft = 600, tasksCompleted = 0, taskDeck = [];
+        let workerId = "", currentTask = null, gameActive = false, timerInterval = null;
+        let deferredPrompt = null;
+        const RENT_GOAL = 375, MAX_CAP = 600, PAY_PER_TASK = 10, SKIP_PENALTY = 10;
+
+        const deck = [
+            { q: "If all A are B, and some B are C, is it certain some A are C?", o: ["Yes", "No"], a: "No", t: "button" },
+            { q: "Math Logic: 1/4 + 1/4 = ?", a: "1/2", t: "text" },
+            { q: "No birds are mammals. All bats are mammals. Therefore, no bats are...?", a: "Birds", t: "text" },
+            { q: "CEO, Manager, Intern. Sort by authority (Highest first).", a: "CEO, Manager, Intern", t: "text" },
+            { q: "Face West. Turn 270 deg right. You face?", o: ["North", "South", "East"], a: "South", t: "button" },
+            { q: "In a Trolley Problem, 'Utility' prioritizes the...?", o: ["Few", "Many"], a: "Many", t: "button" },
+            { q: "Identify: Area code for Hartford?", a: "860", t: "text" },
+            { q: "Sequence: 2, 4, 8, 16... next?", a: "32", t: "text" },
+            { q: "If UP is DOWN, and LEFT is RIGHT, what is UP?", o: ["DOWN", "RIGHT", "LEFT"], a: "DOWN", t: "button" },
+            { q: "Is Hartford the capital of CT? (YES/NO)", o: ["YES", "NO"], a: "YES", t: "button" },
+            { q: "Sequence: 1, 1, 2, 3, 5, 8... next?", a: "13", t: "text" },
+            { q: "Math: 50 minus 10%.", a: "45", t: "text" },
+            { q: "Spatial: Face South. Turn 180 deg. Face?", o: ["North", "East", "West"], a: "North", t: "button" },
+            { q: "Which word has more vowels: 'Ethics' or 'Automation'?", a: "Automation", t: "text" },
+            { q: "Math: Square root of 144?", a: "12", t: "text" }
+        ];
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        // Install PWA Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-prompt').style.display = 'block';
+        });
+
+        document.getElementById('install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                    document.getElementById('install-prompt').style.display = 'none';
+                });
+            }
+        });
+
+        document.getElementById('start-btn').addEventListener('click', function() {
+            workerId = document.getElementById('worker-id-input').value;
+            if(!workerId) return alert("ID Required.");
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-interface').classList.remove('hidden');
+            gameActive = true; earnings = 0; timeLeft = 600;
+            taskDeck = [...deck].sort(() => Math.random() - 0.5); 
+            document.getElementById('user-id-display').innerText = workerId.toUpperCase();
+            updateUI(); nextTask(); timerInterval = setInterval(tick, 1000);
+        });
+
+        function nextTask() {
+            if (earnings >= MAX_CAP || taskDeck.length === 0) { endShift(taskDeck.length === 0 ? "TASK DEPLETED" : "CAP REACHED"); return; }
+            currentTask = taskDeck.pop(); 
+            document.getElementById('task-prompt').innerText = currentTask.q;
+            const ra = document.getElementById('render-area'); ra.innerHTML = "";
+            
+            if (currentTask.t === "text") {
+                const input = document.createElement('input'); 
+                input.type = "text"; input.id = "user-input"; input.placeholder = "Answer...";
+                
+                const row = document.createElement('div'); 
+                row.className = "button-row";
+                
+                const sub = document.createElement('button'); 
+                sub.className = "btn-submit"; sub.innerText = "SUBMIT";
+                sub.onclick = () => { if(document.getElementById('user-input').value.trim()) validate(document.getElementById('user-input').value.trim()); };
+                
+                const skp = document.createElement('button'); 
+                skp.className = "btn-skip"; skp.innerText = "SKIP";
+                skp.onclick = () => skipTask();
+                
+                ra.appendChild(input);
+                row.appendChild(sub); row.appendChild(skp);
+                ra.appendChild(row);
+            } else {
+                const g = document.createElement('div'); 
+                g.className = "grid-options";
+                currentTask.o.forEach(o => {
+                    const b = document.createElement('button'); 
+                    b.className = "opt-btn"; b.innerText = o;
+                    b.onclick = () => validate(o); 
+                    g.appendChild(b);
+                });
+                
+                const skp = document.createElement('button'); 
+                skp.className = "btn-skip"; skp.innerText = "SKIP LOGIC (-$10)";
+                skp.style.marginTop = "10px"; skp.style.width = "100%";
+                skp.onclick = () => skipTask();
+                
+                ra.appendChild(g);
+                ra.appendChild(skp);
+            }
+        }
+
+        function validate(v) {
+            if (!gameActive) return;
+            if (v.toUpperCase() === currentTask.a.toUpperCase()) { earnings += PAY_PER_TASK; tasksCompleted++; nextTask(); } 
+            else { alert("QC ERROR"); nextTask(); }
+            updateUI();
+        }
+
+        function skipTask() { if (gameActive) { earnings -= SKIP_PENALTY; updateUI(); nextTask(); } }
+
+        function updateUI() {
+            const d = document.getElementById('earnings-display');
+            d.innerText = `$${earnings.toFixed(2)}`;
+            d.style.color = (earnings < 0) ? "var(--alert)" : "var(--neon)";
+            document.getElementById('task-counter').innerText = tasksCompleted;
+        }
+
+        function tick() {
+            if (!gameActive) return;
+            if (timeLeft <= 0) { endShift("TIME UP"); return; }
+            timeLeft--;
+            let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            if ([540, 420, 300, 180, 60].includes(timeLeft)) {
+                earnings -= 30; document.body.style.background = "#200";
+                setTimeout(() => { document.body.style.background = "#000"; }, 500);
+                updateUI();
+            }
+        }
+
+        function endShift(reason) {
+            gameActive = false; clearInterval(timerInterval);
+            document.getElementById('task-prompt').classList.add('hidden');
+            document.getElementById('render-area').classList.add('hidden');
+            document.getElementById('final-report').classList.remove('hidden');
+            let status = earnings >= RENT_GOAL ? "STABLE" : "EVICTED";
+            document.getElementById('report-text').innerHTML = `ID: ${workerId}<br>UNITS: ${tasksCompleted}<br>BANK: $${earnings.toFixed(2)}<br>STATUS: ${status}`;
+        }
+    </script>
+</body>
+</html>
